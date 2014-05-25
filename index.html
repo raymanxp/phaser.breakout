@@ -21,6 +21,8 @@
     var wall;
     var platformHorizontalShift = 10    
     var ballThrown = false;
+	var score=0;
+	var scoreText = 'Score: ';
 
     function preload() {
         game.load.image('ball', 'images/ball.png');
@@ -38,6 +40,7 @@
         initializeBall(startingX, startingY);
         initializePlatform(startingX, startingY);
         createWall();
+		scoreText = game.add.text(16, 16, scoreText + score, {fontSize: '32', fill: '#fff'});
     }
 
 
@@ -89,7 +92,7 @@
     function checkCollision(){
         game.physics.arcade.collide(destructoBall, platform, bounceBall, null, this);
         game.physics.arcade.collide(destructoBall, wall, destroyBrick, null, this);
-		game.physics.arcade.collide(destructoBall, platform, bounceBall, null, this);
+//		game.physics.arcade.collide(destructoBall, game.world., bounceBall, null, this);
     }
 	function bounceBall(){
 		if(destructoBall.body.velocity.y < 0){
@@ -106,7 +109,13 @@
     function destroyBrick(destructoBall, brick){
         brick.kill();
 		bounceBall(destructoBall);
+		updateScore(10);
     }
+	
+	function updateScore(score){
+		score += score;
+		scoreText.text = 'Score: ' + score;
+	}
 
     function handleInput(){
         var cursors = game.input.keyboard.createCursorKeys();    
