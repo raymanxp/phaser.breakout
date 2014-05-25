@@ -1,0 +1,120 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>Breakout - Phaser</title>
+	<script type="text/javascript" src="js/phaser.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+    var game = new Phaser.Game(800, 400, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+
+    var platform;
+    var destructoBall;    
+    var wall;
+    var platformHorizontalShift = 10    
+    var ballThrown = false;
+
+    function preload() {
+        game.load.image('ball', 'images/ball.png');
+        game.load.image('block', 'images/block.png');
+        game.load.image('platform', 'images/platform.png');
+
+    }
+    /*
+        CREATE function
+    */
+    function create() {
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        
+        var startingX = 240; var startingY = game.world.height-60;
+        initializeBall(startingX, startingY);
+        initializePlatform(startingX, startingY);
+        createWall();
+    }
+
+
+    function initializePlatform(startingX, startingY){
+        platformYOffset = 60;
+        platform = game.add.sprite(startingX, startingY-platformYOffset, 'platform');
+        game.physics.arcade.enable(platform);
+
+        platform.body.collideWorldBounds = true;
+    }
+    function initializeBall(startingX, startingY){
+        ballYOffset = 70;
+        ballXOffset = 25;
+        destructoBall = game.add.sprite(startingX + ballXOffset, startingY - ballYOffset, 'ball');
+        game.physics.arcade.enable(destructoBall);
+
+        destructoBall.body.collideWorldBounds = true;
+    }
+
+    function createWall(){
+        wall = game.add.group();
+        wall.enableBody = true;
+        var brickY; var brickX;
+        var brickWidth=20; 
+        var brickHeight=20;
+        for(var row = 0; row < 5; row ++ ){
+            brickY = row * brickHeight;
+            for(var column = 0; column < 80; column ++){
+                brickX += column + brickWidth;
+                var brick = createBrick(brickX, brickY);
+            }
+        }
+    }
+    function createBrick(x, y){
+        var newBrick = wall.create(x, y, 'block');
+        newBrick.body.immovable = true;
+        return newBrick;
+    }    
+
+
+    /*
+        UPDATE
+    */
+    function update() {
+        handleInput();
+
+    }
+    function setupCollision(){
+        game.physics.arcade.collide(destructoBall, platform);
+        game.physics.arcade.overlap(destructoBall, wall, collectStar, null, this);
+    }
+    function destroyBrick(destructoBall, brick){
+        brick.kill();
+    }
+
+    function handleInput(){
+        var cursors = game.input.keyboard.createCursorKeys();    
+        var launchKey = game.input.keyboard
+        if(cursors.left.isDown && platform.body.x > 0){
+            platform.body.x -= platformHorizontalShift;
+            if(!ballThrown){
+                destructoBall.body.x -= platformHorizontalShift;
+            }
+                
+        } else if(cursors.right.isDown && platform.body.x < game.world.width - platform.body.width){
+            platform.body.x += platformHorizontalShift;
+            if(!ballThrown){
+                destructoBall.body.x += platformHorizontalShift;
+            }
+        }
+    }
+    function throwBall(cursors){
+        
+        ballThrown = true;
+    }
+
+</script>
+
+</body>
+</html>
