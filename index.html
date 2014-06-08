@@ -21,28 +21,31 @@
     var wall;
     var platformHorizontalShift = 10    
     var ballThrown = false;
-	var score=0;
+	var totalScore=0;
 	var scoreText = 'Score: ';
 
     function preload() {
         game.load.image('ball', 'images/ball.png');
         game.load.image('block', 'images/block.png');
         game.load.image('platform', 'images/platform.png');
-
     }
     /*
         CREATE function
     */
     function create() {
         game.physics.startSystem(Phaser.Physics.ARCADE);
+        createBoundary();
         
         var startingX = 240; var startingY = game.world.height-60;
         initializeBall(startingX, startingY);
         initializePlatform(startingX, startingY);
         createWall();
-		scoreText = game.add.text(16, 16, scoreText + score, {fontSize: '32', fill: '#fff'});
+		scoreText = game.add.text(16, 16, scoreText + totalScore, {fontSize: '32', fill: '#fff'});
     }
-
+    // create the game boundry
+    function createBoundary(){
+        game.physics.arcade.checkCollision.down = false;
+    }
 
     function initializePlatform(startingX, startingY){
         platformYOffset = 60;
@@ -51,14 +54,18 @@
 		
 		platform.body.immovable = true;
         platform.body.collideWorldBounds = true;
+        platform.body.bounce.set(.8);
     }
     function initializeBall(startingX, startingY){
-        ballYOffset = 70;
+        ballYOffset = 80;
         ballXOffset = 25;
         destructoBall = game.add.sprite(startingX + ballXOffset, startingY - ballYOffset, 'ball');
-        game.physics.arcade.enable(destructoBall); 
-
+        destructoBall.scale.setTo(2,2)
+        game.physics.arcade.enable(destructoBall);
+        
+        destructoBall.body.bounce.set(1);
         destructoBall.body.collideWorldBounds = true;
+        destructoBall.checkWorldBounds = true;
     }
 
     function createWall(){
@@ -78,6 +85,8 @@
     function createBrick(x, y){
         var newBrick = wall.create(x, y, 'block');
         newBrick.body.immovable = true;
+        game.physics.arcade.enable(newBrick);
+        newBrick.body.bounce.set(1);
         return newBrick;
     }    
 
@@ -92,29 +101,18 @@
     function checkCollision(){
         game.physics.arcade.collide(destructoBall, platform, bounceBall, null, this);
         game.physics.arcade.collide(destructoBall, wall, destroyBrick, null, this);
-//		game.physics.arcade.collide(destructoBall, game.world., bounceBall, null, this);
     }
 	function bounceBall(){
-		if(destructoBall.body.velocity.y < 0){
-			destructoBall.body.velocity.y = 400;
-		} else {
-			destructoBall.body.velocity.y = -400;
-		}
-		/*if(destructoBall.body.velocity.x < 0) {
-			destructoBall.body.velocity.x = 400;
-		} else{
-			destructoBall.body.velocity.x = -400;
-		}*/
+		//todo: Create angled bounces
 	}
     function destroyBrick(destructoBall, brick){
         brick.kill();
-		bounceBall(destructoBall);
 		updateScore(10);
     }
 	
 	function updateScore(score){
-		score += score;
-		scoreText.text = 'Score: ' + score;
+		totalScore += score;
+		scoreText.text = 'Score: ' + totalScore;
 	}
 
     function handleInput(){
